@@ -1,0 +1,60 @@
+//---------------------------------------------------
+//	Kevin Weinpel 
+//	Paris Weather Visual Design
+//---------------------------------------------------
+
+var balls = []; 
+var data; 
+var dates = [];	
+var texts = []; 
+var temps = []; 
+
+function preload(){
+		data = loadJSON('paris-weather.json');
+}
+
+function setup() {
+  createCanvas(600, 800);
+  noStroke();
+  // Create objects
+  for (var o=0; o<10; o++) {
+    balls.push(new Heat());
+  }
+}
+
+function draw() {
+  background(240);
+  var forecastArray = data.query.results.channel.item.forecast;
+  for (var i=0; i<forecastArray.length; i++) {
+    dates[i] = forecastArray[i].date;
+    texts[i] = forecastArray[i].text;
+    temps[i] = forecastArray[i].high;
+    balls[i].move(temps[i]);
+    balls[i].display(temps[i], dates[i]);
+  }
+}
+
+// Heat class
+function Heat() {
+  this.direction = 1;
+  this.x = random(0, 400);
+  this.diameter = random(20, 40);
+  
+  this.move = function(speedVar) {
+    this.speed = (map(speedVar, 55, 61, 1, 5)*this.direction);
+    this.x += this.speed
+		if(this.x < 0 || this.x > width)
+			this.direction *= -1;
+  };
+  	this.display = function(colorVar, date) {
+    this.temp = map(colorVar, min(temps), max(temps), 10, 100);
+    
+    var colorVal = map(colorVar, min(temps), max(temps), 10, 255);
+    tempColor = color(colorVal, 100, 255-colorVal);
+   	fill(tempColor);
+    
+    this.y = map(colorVar, min(temps), max(temps), 50, height-50);
+    text(date, this.temp/2+4+this.x, this.y);
+    ellipse(this.x, this.y, map(colorVar, min(temps), max(temps), 10, 100), map(colorVar, min(temps), max(temps), 10, 100));
+  };
+}
